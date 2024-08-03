@@ -17,7 +17,7 @@ public class VipHooks(): BasePlugin
 
     public override string ModuleAuthor => "Nick Fox";
     public override string ModuleName => "[VIP] Hooks";
-    public override string ModuleVersion => "1.1";
+    public override string ModuleVersion => "1.2";
 
     private IVipCoreApi? _vip;
     private IHooksApi? _hooks;
@@ -48,6 +48,25 @@ public class VipHooks(): BasePlugin
     {
         for (int i = 0; i < 65; i++)
             hooksCount[i] = 0;
+        return HookResult.Continue;
+    }
+
+    [GameEventHandler]
+    public HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
+    {
+        for (int i = 0; i < 65; i++)
+        {
+            var player = Utilities.GetPlayerFromSlot(i);
+
+            if (IsValidPlayer(player) && _vip.IsClientVip(player) && _vip.PlayerHasFeature(player, "HooksEnd"))
+            {
+                var count = _vip.GetFeatureValue<int>(player, "HooksEnd");
+                if (count == 0)
+                    hooksCount[i] = -1;
+                else
+                    hooksCount[i] = count;
+            }
+        }
         return HookResult.Continue;
     }
 
@@ -116,6 +135,17 @@ public class VipHooks(): BasePlugin
         public HooksModule(IVipCoreApi api) : base(api)
         {
             
+        }
+
+    }
+
+    public class HooksModuleEnd : VipFeatureBase
+    {
+        public override string Feature => "HooksEnd";
+
+        public HooksModuleEnd(IVipCoreApi api) : base(api)
+        {
+
         }
 
     }
